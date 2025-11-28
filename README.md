@@ -23,6 +23,11 @@
 - **Responsive Design** - Beautiful on desktop, tablet, and mobile
 - **Quick Prompts** - Pre-configured suggestions to get started
 - **Smooth Scrolling** - Auto-scroll to latest messages with custom scrollbars
+<<<<<<< HEAD
+=======
+- **Lightning Fast** - Built with Vite for optimal performance
+
+>>>>>>> 0e4d926 (Update README)
 ---
 
 ## Quick Start
@@ -82,7 +87,11 @@ Before you begin, ensure you have the following installed:
 
    ```env
    GOOGLE_API_KEY=your_google_ai_studio_api_key_here
+<<<<<<< HEAD
    GOOGLE_MODEL=gemini-2.5-pro
+=======
+   GOOGLE_MODEL=gemini-1.5-flash
+>>>>>>> 0e4d926 (Update README)
    PORT=5000
    ```
 
@@ -208,7 +217,11 @@ const PROMPTS = [
 Modify the `GOOGLE_MODEL` in `server/.env`:
 
 ```env
+<<<<<<< HEAD
 GOOGLE_MODEL=gemini-2.5-pro  # or gemini-2.5-flash || gemini-2.5-flash-lite
+=======
+GOOGLE_MODEL=gemini-1.5-pro  # or gemini-1.5-flash
+>>>>>>> 0e4d926 (Update README)
 ```
 
 ---
@@ -269,6 +282,10 @@ Give a star if this project helped you!
 
 <div align="center">
 
+<<<<<<< HEAD
 **Built with React, Node.js, and Google Gemini AI**
+=======
+**Built with React, Node.js, and Google Gemini AI API KEY**
+>>>>>>> 0e4d926 (Update README)
 
 </div>
