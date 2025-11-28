@@ -160,9 +160,12 @@ function App() {
       </a>
       <div className="chat-card">
       <header className="chat-header">
-  <div>
-    <p className="eyebrow">Nero · AI Companion</p>
-    <h1>Ask, explore, create.</h1>
+  <div className="header-title-container">
+    <img src="/nero-logo.svg" alt="Nero AI Logo" className="header-logo" />
+    <div>
+      <p className="eyebrow">Nero · AI Companion</p>
+      <h1>Ask, explore, create.</h1>
+    </div>
   </div>
 
   <span className="status">{status}</span>

@@ -53,6 +53,25 @@
   margin-bottom: 1.5rem;
 }
 
+.header-title-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(184, 251, 60, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.header-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(184, 251, 60, 0.5);
+}
+
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.2em;
