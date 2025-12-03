@@ -8,7 +8,7 @@ export default function MessageInput({
   disabled,
   onInterrupt,
   canInterrupt,
-  placeholder = "Ask me anything...",
+  placeholder = "",
 }) {
   const textareaRef = useRef(null);
 
@@ -29,10 +29,14 @@ export default function MessageInput({
     }
   };
 
+  const handleComposerClick = () => {
+    textareaRef.current?.focus();
+  };
+
   const handleKeyDown = (event) => {
     if (event.key !== "Enter") return;
     if (event.ctrlKey) {
-      return; // allow newline
+      return;
     }
 
     event.preventDefault();
@@ -47,7 +51,7 @@ export default function MessageInput({
   };
 
   return (
-    <form className="composer" onSubmit={handleSubmit}>
+    <form className="composer" onSubmit={handleSubmit} onClick={handleComposerClick}>
       <textarea
         ref={textareaRef}
         className="composer-field"

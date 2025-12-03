@@ -8,29 +8,100 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MODEL_NAME = process.env.GOOGLE_MODEL;
+const apiKey = process.env.GOOGLE_API_KEY;
 
 app.use(cors());
 app.use(express.json());
 
-const apiKey = process.env.GOOGLE_API_KEY;
-
 if (!apiKey) {
-  console.warn(
-    "⚠️  GOOGLE_API_KEY is not set. The chatbot endpoint will fail until you provide it."
-  );
+  console.warn("GOOGLE_API_KEY is not set.");
 }
+
+const BEHAVIOURS = {
+  explainer: {
+    system:
+      "You are a friendly and patient teacher. Explain concepts step-by-step with short examples. Use simple language.",
+    generationConfig: {
+      temperature: 0.2,
+      topP: 0.95,
+      maxOutputTokens: 800
+    },
+    examples: [
+      {
+        role: "model",
+        parts: [
+          {
+            text:
+              "User: How do I center a div?\nAssistant: Use margin:auto and a width. Example:\n<code>div { width: 300px; margin: 0 auto; }</code>"
+          }
+        ]
+      }
+    ]
+  },
+
+  brief: {
+    system:
+      "You are a concise assistant. Answer in up to 3 short bullet points. No extra chit-chat.",
+    generationConfig: {
+      temperature: 0.0,
+      topP: 0.8,
+      maxOutputTokens: 500
+    },
+    examples: []
+  },
+
+  json_api: {
+    system:
+      "You are a JSON generator. For any question, output a single valid JSON object with keys: intent, answer. No surrounding text.",
+    generationConfig: {
+      temperature: 0.0,
+      topP: 0.9,
+      maxOutputTokens: 500
+    },
+    examples: []
+  },
+
+  sarcastic_humor: {
+    system:
+      "You are a witty, sarcastic assistant who answers with dry humor, harmless jokes, and playful teasing. Keep responses helpful but deliver them with a slightly annoyed tone, like you're dealing with someone who can't read tooltips. Avoid insults and avoid hateful, sexual, or violent content. Keep the humor clever, not rude.",
+    generationConfig: {
+      temperature: 0.7,
+      topP: 0.95,
+      maxOutputTokens: 2048
+    },
+    examples: [
+      {
+        role: "model",
+        parts: [
+          {
+            text:
+              "User: What is JavaScript?\nAssistant: A language that lets browsers do more than stare blankly at HTML. Think of it as the overworked intern of the internet."
+          }
+        ]
+      },
+      {
+        role: "model",
+        parts: [
+          {
+            text:
+              "User: Why is my code not working?\nAssistant: Because computers enjoy suffering, and yours sensed fear. But fine, let's debug it."
+          }
+        ]
+      }
+    ]
+  }
+};
+
 
 const normalizeHistory = (messages = []) => {
   const safeMessages = messages.filter((msg) => msg?.role && msg?.content);
 
-  // Gemini requires the first entry to be from the user. Drop leading assistant/system msgs.
   const firstUserIndex = safeMessages.findIndex((msg) => msg.role === "user");
-  const ordered =
-    firstUserIndex === -1 ? [] : safeMessages.slice(firstUserIndex);
+  const ordered = firstUserIndex === -1 ? [] : safeMessages.slice(firstUserIndex);
 
   return ordered.map((msg) => ({
     role: msg.role === "assistant" ? "model" : "user",
-    parts: [{ text: msg.content }],
+    parts: [{ text: msg.content }]
   }));
 };
 
@@ -39,43 +110,95 @@ app.get("/health", (_req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
-  const { messages = [] } = req.body;
+  const { messages = [], behaviour = "explainer" } = req.body;
 
   if (!apiKey) {
     return res.status(500).json({ error: "Missing GOOGLE_API_KEY" });
   }
 
   if (!Array.isArray(messages) || messages.length === 0) {
-    return res
-      .status(400)
-      .json({ error: "messages array with at least one entry is required" });
+    return res.status(400).json({ error: "messages array with at least one entry is required" });
   }
 
   const latestMessage = messages[messages.length - 1];
 
   if (latestMessage?.role !== "user" || !latestMessage?.content?.trim()) {
-    return res
-      .status(400)
-      .json({ error: "Last message must be a non-empty user message" });
+    return res.status(400).json({ error: "Last message must be a non-empty user message" });
   }
+
+  const preset = BEHAVIOURS[behaviour] || BEHAVIOURS.explainer;
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+    
+    const modelConfig = {
+      model: MODEL_NAME,
+      systemInstruction: preset.system,
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_NONE"
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_NONE"
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_NONE"
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_NONE"
+        }
+      ]
+    };
+    
+    const model = genAI.getGenerativeModel(modelConfig);
+    const allHistory = normalizeHistory(messages.slice(0, -1));
+    const historyFromClient = allHistory.slice(-10);
 
-    const history = normalizeHistory(messages.slice(0, -1));
+    const chatSession = model.startChat({
+      history: historyFromClient,
+      generationConfig: {
+        ...preset.generationConfig,
+        maxOutputTokens: Math.max(preset.generationConfig.maxOutputTokens, 1024)
+      }
+    });
+
     const latest = latestMessage.content.trim();
-
-    const chatSession = model.startChat({ history });
     const result = await chatSession.sendMessage(latest);
-    const reply = result.response.text();
+
+    const candidates = result.response?.candidates;
+    if (candidates && candidates.length > 0) {
+      const finishReason = candidates[0]?.finishReason;
+      if (finishReason && finishReason !== 'STOP') {
+        console.warn(`[${behaviour}] Response blocked. Reason: ${finishReason}`);
+        
+        if (finishReason === 'MAX_TOKENS') {
+          const partialText = candidates[0]?.content?.parts?.[0]?.text;
+          if (partialText) {
+            return res.json({ reply: partialText });
+          }
+        }
+      }
+    }
+
+    const reply = result.response?.text?.() ?? "";
+
+    if (!reply) {
+      console.warn(`[${behaviour}] Empty reply received`);
+      return res.json({ 
+        reply: "I apologize, but I couldn't generate a response. This might be due to token limits. Please try a shorter message or reset the conversation." 
+      });
+    }
 
     res.json({ reply });
   } catch (error) {
     console.error("Chat route error:", error);
     res.status(500).json({
       error: "Failed to fetch response from Google AI Studio",
-      details: error.message,
+      details: error?.message ?? String(error)
     });
   }
 });
@@ -83,5 +206,3 @@ app.post("/api/chat", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
-
-

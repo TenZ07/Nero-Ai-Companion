@@ -1,14 +1,14 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
 
 const defaultHeaders = {
   "Content-Type": "application/json",
 };
 
-export async function sendChat(messages, signal) {
+export async function sendChat(messages, behaviour = "explainer", signal) {
   const response = await fetch(`${API_BASE_URL}/api/chat`, {
     method: "POST",
     headers: defaultHeaders,
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, behaviour }),
     signal,
   });
 
@@ -24,6 +24,3 @@ export async function sendChat(messages, signal) {
 export function getHealth() {
   return fetch(`${API_BASE_URL}/health`).then((res) => res.json());
 }
-
-
-

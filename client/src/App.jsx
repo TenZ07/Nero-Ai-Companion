@@ -7,10 +7,10 @@ import { sendChat, getHealth } from "./lib/api";
 import "./App.css";
 
 const PROMPTS = [
-  "Summarize the latest AI trends in simple terms.",
-  "Plan a 3-day trip to Tokyo focused on food.",
-  "Help me craft an email introducing myself to a new team.",
-  "Give me a creative coding challenge for today.",
+  "Ask my goals and preferences first, then build a personalized plan.",
+  "Ask my subject and level, then explain and quiz me.",
+  "Ask project details such as language, features, then generate the code.",
+  "Ask tone and purpose first, then write the final content.",
 ];
 
 const makeId = () =>
@@ -24,10 +24,11 @@ function App() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hey, I'm Nero—your AI co-pilot powered by Google Gemini. Ask me anything and I'll reply with style ",
+        "Hey, I'm Nero, your AI co-pilot powered by Google Gemini.",
     },
   ]);
   const [input, setInput] = useState("");
+  const [behaviour, setBehaviour] = useState("explainer");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("Checking connection…");
   const [isSending, setIsSending] = useState(false);
@@ -35,14 +36,24 @@ function App() {
   const chatWindowRef = useRef(null);
   const isAbortedRef = useRef(false);
 
+  const handleBehaviourChange = (newBehaviour) => {
+    setBehaviour(newBehaviour);
+    setMessages([
+      {
+        id: "welcome",
+        role: "assistant",
+        content: "Hey, I'm Nero, your AI co-pilot powered by Google Gemini.",
+      },
+    ]);
+    setError("");
+  };
+
   useEffect(() => {
     getHealth()
       .then((data) =>
-        setStatus(`Connected · ${data?.model ?? "Google AI Studio"}`)
+        setStatus(`Connected · Model: ${data?.model ?? "Google AI Studio"}`)
       )
-      .catch(() =>
-        setStatus("Offline · Check that the Node server is running.")
-      );
+      .catch(() => setStatus("Offline."));
   }, []);
 
   useEffect(() => {
@@ -80,23 +91,24 @@ function App() {
         content,
       }));
 
-      const { reply } = await sendChat(payload, controller.signal);
+      const data = await sendChat(payload, behaviour, controller.signal);
+      const reply = data?.reply || "";
       
-      // Only add the response if the request wasn't aborted
       if (!isAbortedRef.current) {
-        setMessages((prev) => [
-          ...prev,
-          { id: makeId(), role: "assistant", content: reply },
-        ]);
+        if (reply) {
+          setMessages((prev) => [
+            ...prev,
+            { id: makeId(), role: "assistant", content: reply },
+          ]);
+        } else {
+          setError("Received empty response from server");
+        }
       }
     } catch (err) {
       if (err.name === "AbortError") {
         setError("Response interrupted.");
-      } else {
-        // Only show error if not aborted
-        if (!isAbortedRef.current) {
-          setError(err.message || "Something went wrong. Try again.");
-        }
+      } else if (!isAbortedRef.current) {
+        setError(err.message || "Something went wrong. Try again.");
       }
     } finally {
       setIsSending(false);
@@ -168,7 +180,19 @@ function App() {
     </div>
   </div>
 
-  <span className="status">{status}</span>
+  <div className="header-controls">
+    <select 
+      className="behaviour-select" 
+      value={behaviour} 
+      onChange={(e) => handleBehaviourChange(e.target.value)}
+      disabled={isSending}
+    >
+      <option value="explainer">Explainer</option>
+      <option value="brief">Brief</option>
+      <option value="sarcastic_humor">Sarcastic Humor</option>
+    </select>
+    <span className="status">{status}</span>
+  </div>
 </header>
 
 
