@@ -197,7 +197,7 @@ app.post("/api/chat", async (req, res) => {
   } catch (error) {
     console.error("Chat route error:", error);
     res.status(500).json({
-      error: "Failed to fetch response from Google AI Studio",
+      error: "Error - status-500",
       details: error?.message ?? String(error)
     });
   }

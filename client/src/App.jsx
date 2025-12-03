@@ -53,7 +53,7 @@ function App() {
       .then((data) =>
         setStatus(`Connected · Model: ${data?.model ?? "Google AI Studio"}`)
       )
-      .catch(() => setStatus("Offline."));
+      .catch(() => setStatus("Offline"));
   }, []);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ function App() {
             { id: makeId(), role: "assistant", content: reply },
           ]);
         } else {
-          setError("Received empty response from server");
+          setError("Error : status-404");
         }
       }
     } catch (err) {
