@@ -81,7 +81,7 @@ Before you begin, ensure you have the following installed:
 
    ```env
    GOOGLE_API_KEY=your_google_ai_studio_api_key_here
-   GOOGLE_MODEL=gemini-1.5-pro
+   GOOGLE_MODEL=gemini-2.5-pro || gemini-2.5-flash || gemini-2.5-flash-lite
    PORT=5000
    ```
 
