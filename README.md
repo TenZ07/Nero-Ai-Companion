@@ -198,7 +198,7 @@ const PROMPTS = [
 Modify the `GOOGLE_MODEL` in `server/.env`:
 
 ```env
-GOOGLE_MODEL=gemini-1.5-pro  # or gemini-1.5-flash, gemini-2.5-pro
+GOOGLE_MODEL=gemini-2.5-pro  # or gemini-2.5-flash, gemini-2.5-flash-lite
 ```
 
 ## Troubleshooting
