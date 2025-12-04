@@ -50,6 +50,17 @@ const BEHAVIOURS = {
     examples: []
   },
 
+  json_api: {
+    system:
+      "You are a JSON generator. For any question, output a single valid JSON object with keys: intent, answer. No surrounding text.",
+    generationConfig: {
+      temperature: 0.0,
+      topP: 0.9,
+      maxOutputTokens: 500
+    },
+    examples: []
+  },
+
   sarcastic_humor: {
     system:
       "You are a witty, sarcastic assistant who answers with dry humor, harmless jokes, and playful teasing. Keep responses helpful but deliver them with a slightly annoyed tone, like you're dealing with someone who can't read tooltips. Avoid insults and avoid hateful, sexual, or violent content. Keep the humor clever, not rude.",
@@ -101,6 +112,8 @@ app.get("/health", (_req, res) => {
 app.post("/api/chat", async (req, res) => {
   const { messages = [], behaviour = "explainer", model } = req.body;
   const selectedModel = model || MODEL_NAME;
+
+  console.log(`[CHAT REQUEST] Model: ${selectedModel} | Behaviour: ${behaviour}`);
 
   if (!apiKey) {
     return res.status(500).json({ error: "Missing GOOGLE_API_KEY" });
@@ -177,18 +190,20 @@ app.post("/api/chat", async (req, res) => {
     const reply = result.response?.text?.() ?? "";
 
     if (!reply) {
-      console.warn(`[${behaviour}] Error - status-500`);
+      console.warn(`[${behaviour}] Empty reply received`);
       return res.json({ 
         reply: "I apologize, but I couldn't generate a response. This might be due to token limits. Please try a shorter message or reset the conversation." 
       });
     }
 
-    res.json({ reply });
+    console.log(`[CHAT SUCCESS] Model: ${selectedModel} | Response length: ${reply.length} chars`);
+    res.json({ reply, model: selectedModel });
   } catch (error) {
-    console.error("Chat route error:", error);
+    console.error(`[CHAT ERROR] Model: ${selectedModel} | Error:`, error?.message ?? String(error));
     res.status(500).json({
       error: "Error - status-500",
-      details: error?.message ?? String(error)
+      details: error?.message ?? String(error),
+      model: selectedModel
     });
   }
 });

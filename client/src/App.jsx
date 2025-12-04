@@ -29,13 +29,19 @@ function App() {
   ]);
   const [input, setInput] = useState("");
   const [behaviour, setBehaviour] = useState("explainer");
-  const [model, setModel] = useState("gemini-1.5-pro");
+  const [model, setModel] = useState("gemini-2.5-flash");
+  const [currentModel, setCurrentModel] = useState("");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("Checking connection…");
   const [isSending, setIsSending] = useState(false);
   const [abortController, setAbortController] = useState(null);
   const chatWindowRef = useRef(null);
   const isAbortedRef = useRef(false);
+
+  const handleModelChange = (newModel) => {
+    console.log(`[MODEL SELECTED] User selected: ${newModel}`);
+    setModel(newModel);
+  };
 
   const handleBehaviourChange = (newBehaviour) => {
     setBehaviour(newBehaviour);
@@ -51,10 +57,15 @@ function App() {
 
   useEffect(() => {
     getHealth()
-      .then((data) =>
-        setStatus(`Connected · Model: ${data?.model ?? "Google AI Studio"}`)
-      )
-      .catch(() => setStatus("Offline"));
+      .then((data) => {
+        const modelName = data?.model ?? "Google AI Studio";
+        setCurrentModel(modelName);
+        setStatus(`Connected · Model: ${modelName}`);
+      })
+      .catch(() => {
+        setStatus("Offline");
+        setCurrentModel("");
+      });
   }, []);
 
   useEffect(() => {
@@ -94,8 +105,16 @@ function App() {
 
       const data = await sendChat(payload, behaviour, model, controller.signal);
       const reply = data?.reply || "";
+      const responseModel = data?.model || model;
       
       if (!isAbortedRef.current) {
+        // Update current model on successful response
+        if (responseModel !== currentModel) {
+          setCurrentModel(responseModel);
+          setStatus(`Connected · Model: ${responseModel}`);
+          console.log(`[MODEL SWITCH] Now using: ${responseModel}`);
+        }
+        
         if (reply) {
           setMessages((prev) => [
             ...prev,
@@ -109,7 +128,15 @@ function App() {
       if (err.name === "AbortError") {
         setError("Response interrupted.");
       } else if (!isAbortedRef.current) {
-        setError(err.message || "Something went wrong. Try again.");
+        // Check if it's a model connection error
+        const errorMessage = err.message || "Something went wrong. Try again.";
+        setError(errorMessage);
+        
+        // If model failed, update status
+        if (errorMessage.includes("status-500") || errorMessage.includes("Error")) {
+          setStatus(`Failed to connect · Model: ${model}`);
+          console.error(`[MODEL ERROR] Failed to use model: ${model}`);
+        }
       }
     } finally {
       setIsSending(false);
@@ -195,12 +222,13 @@ function App() {
     <select 
       className="behaviour-select model-select" 
       value={model} 
-      onChange={(e) => setModel(e.target.value)}
+      onChange={(e) => handleModelChange(e.target.value)}
       disabled={isSending}
     >
-      <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-      <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+      <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+      <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
       <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+      <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
     </select>
     <span className="status">{status}</span>
   </div>
