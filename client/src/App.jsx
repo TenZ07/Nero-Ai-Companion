@@ -29,6 +29,7 @@ function App() {
   ]);
   const [input, setInput] = useState("");
   const [behaviour, setBehaviour] = useState("explainer");
+  const [model, setModel] = useState("gemini-1.5-pro");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("Checking connection…");
   const [isSending, setIsSending] = useState(false);
@@ -91,7 +92,7 @@ function App() {
         content,
       }));
 
-      const data = await sendChat(payload, behaviour, controller.signal);
+      const data = await sendChat(payload, behaviour, model, controller.signal);
       const reply = data?.reply || "";
       
       if (!isAbortedRef.current) {
@@ -190,6 +191,16 @@ function App() {
       <option value="explainer">Explainer</option>
       <option value="brief">Brief</option>
       <option value="sarcastic_humor">Sarcastic Humor</option>
+    </select>
+    <select 
+      className="behaviour-select model-select" 
+      value={model} 
+      onChange={(e) => setModel(e.target.value)}
+      disabled={isSending}
+    >
+      <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+      <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+      <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
     </select>
     <span className="status">{status}</span>
   </div>

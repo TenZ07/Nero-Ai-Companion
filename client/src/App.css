@@ -133,6 +133,15 @@
   color: #e8f8ff;
 }
 
+.model-select {
+  background: rgba(184, 251, 60, 0.1);
+  border-color: rgba(184, 251, 60, 0.5);
+}
+
+.model-select:hover:not(:disabled) {
+  background: rgba(184, 251, 60, 0.15);
+}
+
 .github-btn {
   position: fixed;
   top: 2rem;

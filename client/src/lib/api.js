@@ -4,11 +4,11 @@ const defaultHeaders = {
   "Content-Type": "application/json",
 };
 
-export async function sendChat(messages, behaviour = "explainer", signal) {
+export async function sendChat(messages, behaviour = "explainer", model = "gemini-1.5-pro", signal) {
   const response = await fetch(`${API_BASE_URL}/api/chat`, {
     method: "POST",
     headers: defaultHeaders,
-    body: JSON.stringify({ messages, behaviour }),
+    body: JSON.stringify({ messages, behaviour, model }),
     signal,
   });
 
