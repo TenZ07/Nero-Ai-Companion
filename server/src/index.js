@@ -134,6 +134,8 @@ app.post("/api/chat", async (req, res) => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     
+    console.log(`[MODEL CONFIG] Initializing with model: ${selectedModel}`);
+    
     const modelConfig = {
       model: selectedModel,
       systemInstruction: preset.system,
@@ -157,15 +159,22 @@ app.post("/api/chat", async (req, res) => {
       ]
     };
     
-    const model = genAI.getGenerativeModel(modelConfig);
+    const generativeModel = genAI.getGenerativeModel(modelConfig);
     const allHistory = normalizeHistory(messages.slice(0, -1));
     const historyFromClient = allHistory.slice(-10);
 
-    const chatSession = model.startChat({
+    // Gemini 2.5 Pro uses more tokens for thinking, so we need a higher limit
+    const isProModel = selectedModel.includes('2.5-pro');
+    const minTokens = isProModel ? 4096 : 1024;
+    const finalMaxTokens = Math.max(preset.generationConfig.maxOutputTokens, minTokens);
+    
+    console.log(`[TOKEN CONFIG] Model: ${selectedModel} | maxOutputTokens: ${finalMaxTokens}`);
+
+    const chatSession = generativeModel.startChat({
       history: historyFromClient,
       generationConfig: {
         ...preset.generationConfig,
-        maxOutputTokens: Math.max(preset.generationConfig.maxOutputTokens, 1024)
+        maxOutputTokens: finalMaxTokens
       }
     });
 
@@ -176,12 +185,22 @@ app.post("/api/chat", async (req, res) => {
     if (candidates && candidates.length > 0) {
       const finishReason = candidates[0]?.finishReason;
       if (finishReason && finishReason !== 'STOP') {
-        console.warn(`[${behaviour}] Response blocked. Reason: ${finishReason}`);
+        console.warn(`[${behaviour}] Response blocked. Reason: ${finishReason} | Model: ${selectedModel}`);
         
         if (finishReason === 'MAX_TOKENS') {
           const partialText = candidates[0]?.content?.parts?.[0]?.text;
           if (partialText) {
-            return res.json({ reply: partialText });
+            console.log(`[MAX_TOKENS] Returning partial response (${partialText.length} chars)`);
+            return res.json({ 
+              reply: partialText + "\n\n[Response was truncated due to length. Please continue or ask a follow-up question.]",
+              model: selectedModel 
+            });
+          } else {
+            // No partial text available, return helpful message
+            return res.json({ 
+              reply: `The response exceeded the token limit for ${selectedModel}. Please try:\n- Using a shorter prompt\n- Switching to gemini-2.5-flash for better token efficiency\n- Breaking your question into smaller parts`,
+              model: selectedModel 
+            });
           }
         }
       }

@@ -103,6 +103,7 @@ function App() {
         content,
       }));
 
+      console.log(`[SENDING REQUEST] Using model: ${model}`);
       const data = await sendChat(payload, behaviour, model, controller.signal);
       const reply = data?.reply || "";
       const responseModel = data?.model || model;
