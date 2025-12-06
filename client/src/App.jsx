@@ -58,7 +58,7 @@ function App() {
   useEffect(() => {
     getHealth()
       .then((data) => {
-        const modelName = data?.model ?? "Google AI Studio";
+        const modelName = data?.model ?? "gemini-2.5-flash";
         setCurrentModel(modelName);
         setStatus(`Connected · Model: ${modelName}`);
       })
