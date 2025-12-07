@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import fetch from "node-fetch";
 
 dotenv.config();
 
@@ -9,12 +10,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MODEL_NAME = process.env.GOOGLE_MODEL;
 const apiKey = process.env.GOOGLE_API_KEY;
+const openRouterApiKey = process.env.OPENROUTER_API_KEY;
 
 app.use(cors());
 app.use(express.json());
 
 if (!apiKey) {
   console.warn("GOOGLE_API_KEY is not set.");
+}
+
+if (!openRouterApiKey) {
+  console.warn("OPENROUTER_API_KEY is not set.");
 }
 
 const BEHAVIOURS = {
@@ -105,6 +111,48 @@ const normalizeHistory = (messages = []) => {
   }));
 };
 
+// Helper function to call OpenRouter API
+const callOpenRouter = async (messages, behaviour, model) => {
+  const preset = BEHAVIOURS[behaviour] || BEHAVIOURS.explainer;
+  
+  // Convert messages to OpenRouter format
+  const openRouterMessages = messages.map(msg => ({
+    role: msg.role,
+    content: msg.content
+  }));
+  
+  // Add system message at the beginning
+  openRouterMessages.unshift({
+    role: "system",
+    content: preset.system
+  });
+
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${openRouterApiKey}`,
+      "HTTP-Referer": "http://localhost:5173",
+      "X-Title": "Nero AI Chatbot",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: openRouterMessages,
+      temperature: preset.generationConfig.temperature,
+      top_p: preset.generationConfig.topP,
+      max_tokens: preset.generationConfig.maxOutputTokens
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+};
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", model: MODEL_NAME });
 });
@@ -114,10 +162,6 @@ app.post("/api/chat", async (req, res) => {
   const selectedModel = model || MODEL_NAME;
 
   console.log(`[CHAT REQUEST] Model: ${selectedModel} | Behaviour: ${behaviour}`);
-
-  if (!apiKey) {
-    return res.status(500).json({ error: "Missing GOOGLE_API_KEY" });
-  }
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: "messages array with at least one entry is required" });
@@ -132,6 +176,25 @@ app.post("/api/chat", async (req, res) => {
   const preset = BEHAVIOURS[behaviour] || BEHAVIOURS.explainer;
 
   try {
+    // Check if this is an OpenRouter model
+    const isOpenRouterModel = selectedModel.includes("qwen") || selectedModel.includes("/");
+    
+    if (isOpenRouterModel) {
+      // Use OpenRouter API
+      if (!openRouterApiKey) {
+        return res.status(500).json({ error: "Missing OPENROUTER_API_KEY" });
+      }
+      
+      console.log(`[OPENROUTER] Using model: ${selectedModel}`);
+      const reply = await callOpenRouter(messages, behaviour, selectedModel);
+      
+      console.log(`[CHAT SUCCESS] Model: ${selectedModel} | Response length: ${reply.length} chars`);
+      res.json({ reply, model: selectedModel });
+    } else {
+      // Use Google Gemini API
+      if (!apiKey) {
+        return res.status(500).json({ error: "Missing GOOGLE_API_KEY" });
+      }
     const genAI = new GoogleGenerativeAI(apiKey);
     
     console.log(`[MODEL CONFIG] Initializing with model: ${selectedModel}`);
@@ -217,6 +280,7 @@ app.post("/api/chat", async (req, res) => {
 
     console.log(`[CHAT SUCCESS] Model: ${selectedModel} | Response length: ${reply.length} chars`);
     res.json({ reply, model: selectedModel });
+    }
   } catch (error) {
     console.error(`[CHAT ERROR] Model: ${selectedModel} | Error:`, error?.message ?? String(error));
     res.status(500).json({

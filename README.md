@@ -4,25 +4,26 @@
 
 ![Nero.AI Banner](https://img.shields.io/badge/Nero.AI-Companion-b8fb3c?style=for-the-badge&logo=ai&logoColor=03045e)
 
-**Your AI co-pilot powered by Google Gemini**
+**Your AI co-pilot powered by Google Gemini and OpenRouter**
 
 [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=flat-square&logo=react&logoColor=white)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4.11-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini%20API-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/)
+[![OpenRouter](https://img.shields.io/badge/OpenRouter-API-FF6B6B?style=flat-square)](https://openrouter.ai/)
 
 </div>
 
 ## Features
 
 - Stunning Glassmorphic UI with modern design and neon accents
-- Real-time AI Chat powered by Google's Gemini AI model
-- Multiple AI Behaviors: Explainer, Brief, JSON API, Sarcastic Humor
+- Real-time AI Chat powered by Google's Gemini AI and OpenRouter models
+- Multiple AI Models: Gemini 2.5 Flash, Gemini 2.5 Pro, Qwen3 Coder, and more
+- Multiple AI Behaviors: Explainer, Brief, Sarcastic Humor
 - Interrupt Support to stop AI responses mid-generation
 - Responsive Design optimized for desktop, tablet, and mobile
 - Quick Prompts with pre-configured suggestions
 - Smooth Scrolling with auto-scroll and custom scrollbars
-- Lightning Fast performance built with Vite
 
 ## Quick Start
 
@@ -33,13 +34,14 @@ Before you begin, ensure you have the following installed:
 - Node.js (v16 or higher)
 - npm or yarn
 - Google AI Studio API Key ([Get it here](https://makersuite.google.com/app/apikey))
+- OpenRouter API Key (Optional - [Get it here](https://openrouter.ai/keys))
 
 ### Installation
 
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/TenZ07/chatbot.git
+   git clone https://github.com/TenZ07/Nero-Ai-Companion.git
    cd chatbot
    ```
 
@@ -77,18 +79,25 @@ Before you begin, ensure you have the following installed:
    cp .env.example .env
    ```
 
-3. Add your Google AI Studio API key to the `.env` file:
+3. Add your API keys to the `.env` file:
 
    ```env
    GOOGLE_API_KEY=your_google_ai_studio_api_key_here
-   GOOGLE_MODEL=gemini-2.5-pro || gemini-2.5-flash || gemini-2.5-flash-lite
+   GOOGLE_MODEL=gemini-2.5-flash || gemini-2.5-flash-lite
+   OPENROUTER_API_KEY=your_openrouter_api_key_here
    PORT=5000
    ```
 
-   How to get your API key:
+   **How to get your Google API key:**
    - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
    - Sign in with your Google account
    - Click "Create API Key"
+   - Copy and paste the key into your `.env` file
+
+   **How to get your OpenRouter API key (for Qwen3 Coder):**
+   - Visit [OpenRouter](https://openrouter.ai/keys)
+   - Sign in or create an account
+   - Generate a new API key
    - Copy and paste the key into your `.env` file
 
 ## Usage
@@ -147,7 +156,7 @@ chatbot/
 ├── server/                # Backend Node.js server
 │   ├── src/
 │   │   └── index.js       # Express server & Gemini API
-│   ├── .env               # Environment variables (create this!)
+│   ├── .env               # Environment variables
 │   └── package.json
 │
 └── README.md
@@ -164,23 +173,12 @@ chatbot/
 - Node.js
 - Express
 - Google Generative AI (Gemini API)
+- OpenRouter API
+- node-fetch
 - CORS
 - dotenv
 
 ## Customization
-
-### Changing the Theme
-
-Edit `client/src/App.css` to customize colors:
-
-```css
-/* Primary accent color */
---accent: #b8fb3c;
-
-/* Background colors */
---bg-primary: #03045e;
---bg-secondary: #05071d;
-```
 
 ### Modifying Prompts
 
@@ -195,31 +193,18 @@ const PROMPTS = [
 
 ### Changing AI Model
 
-Modify the `GOOGLE_MODEL` in `server/.env`:
+You can switch between different AI models directly in the UI using the model selector dropdown, or set a default model in `server/.env`:
 
 ```env
-GOOGLE_MODEL=gemini-2.5-pro  # or gemini-2.5-flash, gemini-2.5-flash-lite
+GOOGLE_MODEL=gemini-2.5-flash # or gemini-2.5-flash-lite
 ```
 
-## Troubleshooting
-
-### Server won't start
-
-- Ensure you've created the `.env` file in the `server` folder
-- Verify your `GOOGLE_API_KEY` is valid
-- Check if port 5000 is available
-
-### Client won't connect
-
-- Make sure the server is running first
-- Check that `VITE_API_BASE_URL` matches your server URL
-- Verify both services are running on different terminals
-
-### API errors
-
-- Confirm your Google AI Studio API key is active
-- Check your API quota hasn't been exceeded
-- Ensure you have internet connection
+**Available Models:**
+- **Gemini 2.5 Flash** - Fast and efficient (Google)
+- **Gemini 2.5 Flash Lite** - Lightweight version (Google)
+- **Nemotron Nano v1** - Lightweight general-purpose model (NVIDIA - Free)
+- **Nemotron Nano v2** - Multimodal vision-language model (NVIDIA - Free)
+- **Qwen3 4B** - Compact general-purpose language model (OpenRouter - Free)
 
 ## License
 
