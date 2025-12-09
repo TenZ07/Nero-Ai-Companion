@@ -231,6 +231,7 @@ function App() {
       <option value="nvidia/nemotron-nano-9b-v2:free">Nemotron Nano v1</option>
       <option value="nvidia/nemotron-nano-12b-v2-vl:free">Nemotron Nano v2</option>
       <option value="qwen/qwen3-4b:free">Qwen3</option>
+      <option value="tngtech/deepseek-r1t2-chimera:free">Deepseek r1t2</option>
     </select>
     <span className="status">{status}</span>
   </div>
