@@ -113,7 +113,6 @@ cd server
 npm start
 ```
 
-The server will start on `http://localhost:5000`
 
 #### Terminal 2: Start the Frontend Client
 
@@ -200,11 +199,11 @@ GOOGLE_MODEL=gemini-2.5-flash # or gemini-2.5-flash-lite
 ```
 
 **Available Models:**
-- **Gemini 2.5 Flash** - Fast and efficient (Google)
-- **Gemini 2.5 Flash Lite** - Lightweight version (Google)
-- **Nemotron Nano v1** - Lightweight general-purpose model (NVIDIA - Free)
-- **Nemotron Nano v2** - Multimodal vision-language model (NVIDIA - Free)
-- **Qwen3 4B** - Compact general-purpose language model (OpenRouter - Free)
+- **Gemini 2.5 Flash** - Fast and efficient
+- **Gemini 2.5 Flash Lite** - Lightweight version
+- **Nemotron Nano v1** - Lightweight general-purpose model
+- **Nemotron Nano v2** - Multimodal vision-language model
+- **Qwen3 4B** - Compact general-purpose language model
 
 ## License
 
