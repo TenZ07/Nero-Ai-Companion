@@ -47,6 +47,9 @@ function App() {
   const [abortController, setAbortController] = useState(null);
   const chatWindowRef = useRef(null);
   const isAbortedRef = useRef(false);
+  const logoClicksRef = useRef(0);
+  const clickTimerRef = useRef(null);
+  const easterEggTriggeredRef = useRef(false);
 
   const handleModelChange = (newModel) => {
     console.log(`[MODEL SELECTED] User selected: ${newModel}`);
@@ -63,6 +66,82 @@ function App() {
       },
     ]);
     setError("");
+  };
+
+  const triggerBalloonEasterEgg = () => {
+    if (easterEggTriggeredRef.current) return;
+    easterEggTriggeredRef.current = true;
+
+    const balloonCount = Math.floor(Math.random() * 16) + 25; // 25-40 balloons
+    const glowColors = [
+      { glow: 'rgba(184, 251, 60, 0.8)', shadow: '0 0 30px rgba(184, 251, 60, 0.9), 0 0 60px rgba(184, 251, 60, 0.6)' },
+      { glow: 'rgba(255, 179, 186, 0.8)', shadow: '0 0 30px rgba(255, 179, 186, 0.9), 0 0 60px rgba(255, 179, 186, 0.6)' },
+      { glow: 'rgba(186, 225, 255, 0.8)', shadow: '0 0 30px rgba(186, 225, 255, 0.9), 0 0 60px rgba(186, 225, 255, 0.6)' },
+      { glow: 'rgba(255, 223, 186, 0.8)', shadow: '0 0 30px rgba(255, 223, 186, 0.9), 0 0 60px rgba(255, 223, 186, 0.6)' },
+      { glow: 'rgba(186, 255, 201, 0.8)', shadow: '0 0 30px rgba(186, 255, 201, 0.9), 0 0 60px rgba(186, 255, 201, 0.6)' },
+      { glow: 'rgba(230, 186, 255, 0.8)', shadow: '0 0 30px rgba(230, 186, 255, 0.9), 0 0 60px rgba(230, 186, 255, 0.6)' },
+    ];
+
+    const container = document.createElement('div');
+    container.className = 'balloon-container';
+    document.body.appendChild(container);
+
+    for (let i = 0; i < balloonCount; i++) {
+      const balloon = document.createElement('img');
+      balloon.src = '/nero-logo.svg';
+      balloon.className = 'balloon-logo';
+      
+      const colorData = glowColors[Math.floor(Math.random() * glowColors.length)];
+      const size = Math.random() * 60 + 30; // 30-90px (bigger range)
+      const startX = Math.random() * 100; // 0-100%
+      const duration = Math.random() * 1.5 + 2; // 2-3.5s (faster!)
+      const delay = Math.random() * 0.5; // 0-0.5s
+      const swayAmount = Math.random() * 80 - 40; // -40 to 40px
+      const rotation = Math.random() * 720 - 360; // -360 to 360 degrees
+      
+      balloon.style.cssText = `
+        left: ${startX}%;
+        width: ${size}px;
+        height: ${size}px;
+        filter: drop-shadow(${colorData.shadow});
+        animation-duration: ${duration}s;
+        animation-delay: ${delay}s;
+        --sway-amount: ${swayAmount}px;
+        --rotation: ${rotation}deg;
+      `;
+      
+      container.appendChild(balloon);
+    }
+
+    // Cleanup after animation
+    setTimeout(() => {
+      container.remove();
+    }, 5000);
+  };
+
+  const handleLogoClick = () => {
+    if (easterEggTriggeredRef.current) return;
+
+    logoClicksRef.current += 1;
+
+    // Clear existing timer
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+    }
+
+    // Reset counter after 5 seconds
+    clickTimerRef.current = setTimeout(() => {
+      logoClicksRef.current = 0;
+    }, 5000);
+
+    // Trigger on 8th click
+    if (logoClicksRef.current === 8) {
+      triggerBalloonEasterEgg();
+      logoClicksRef.current = 0;
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+      }
+    }
   };
 
   useEffect(() => {
@@ -212,7 +291,13 @@ function App() {
       <div className="chat-card">
       <header className="chat-header">
   <div className="header-title-container">
-    <img src="/nero-logo.svg" alt="Nero AI Logo" className="header-logo" />
+    <img 
+      src="/nero-logo.svg" 
+      alt="Nero AI Logo" 
+      className="header-logo" 
+      onClick={handleLogoClick}
+      style={{ cursor: 'pointer' }}
+    />
     <div>
       <p className="eyebrow">Nero · AI Companion</p>
       <h1>Ask, explore, create.</h1>
