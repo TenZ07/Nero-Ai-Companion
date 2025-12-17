@@ -13,6 +13,7 @@ const MODEL_LABELS = {
   "nvidia/nemotron-nano-12b-v2-vl:free": "Nemotron Nano v2",
   "qwen/qwen3-4b:free": "Qwen3",
   "tngtech/deepseek-r1t2-chimera:free": "Deepseek r1t2",
+  "openai/gpt-oss-20b:free":"GPT OSS"
 };
 
 const getModelLabel = (id) => MODEL_LABELS[id] ?? id;
@@ -62,7 +63,7 @@ function App() {
       {
         id: "welcome",
         role: "assistant",
-        content: "Hey, I'm Nero, your AI co-pilot powered by Google Gemini.",
+        content: "Nero is active. Let’s get to work.",
       },
     ]);
     setError("");
@@ -327,6 +328,7 @@ function App() {
       <option value="nvidia/nemotron-nano-12b-v2-vl:free">Nemotron Nano v2</option>
       <option value="qwen/qwen3-4b:free">Qwen3</option>
       <option value="tngtech/deepseek-r1t2-chimera:free" >Deepseek r1t2</option>
+      <option value="openai/gpt-oss-20b:free" >GPT OSS</option>
     </select>
     <span className="status">{status}</span>
   </div>
