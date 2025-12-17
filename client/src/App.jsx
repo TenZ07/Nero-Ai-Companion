@@ -34,7 +34,7 @@ function App() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hey, I'm Nero, your AI co-pilot powered by Google Gemini.",
+        "Nero is active. Let’s get to work.",
     },
   ]);
   const [input, setInput] = useState("");
