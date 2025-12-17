@@ -6,6 +6,16 @@ import Footer from "./components/Footer";
 import { sendChat, getHealth } from "./lib/api";
 import "./App.css";
 
+const MODEL_LABELS = {
+  "gemini-2.5-flash": "Gemini 2.5 Flash",
+  "gemini-2.5-flash-lite": "Gemini 2.5 Flash Lite",
+  "nvidia/nemotron-nano-9b-v2:free": "Nemotron Nano v1",
+  "nvidia/nemotron-nano-12b-v2-vl:free": "Nemotron Nano v2",
+  "qwen/qwen3-4b:free": "Qwen3",
+  "tngtech/deepseek-r1t2-chimera:free": "Deepseek r1t2",
+};
+
+const getModelLabel = (id) => MODEL_LABELS[id] ?? id;
 const PROMPTS = [
   "Ask my goals and preferences first, then build a personalized plan.",
   "Ask my subject and level, then explain and quiz me.",
@@ -60,7 +70,7 @@ function App() {
       .then((data) => {
         const modelName = data?.model ?? "gemini-2.5-flash";
         setCurrentModel(modelName);
-        setStatus(`Connected · Model: ${modelName}`);
+        setStatus(`Connected · Model: ${getModelLabel(modelName)}`);
       })
       .catch(() => {
         setStatus("Offline");
@@ -112,7 +122,7 @@ function App() {
         // Update current model on successful response
         if (responseModel !== currentModel) {
           setCurrentModel(responseModel);
-          setStatus(`Connected · Model: ${responseModel}`);
+          setStatus(`Connected · Model: ${getModelLabel(responseModel)}`);
           console.log(`[MODEL SWITCH] Now using: ${responseModel}`);
         }
         
@@ -135,7 +145,7 @@ function App() {
         
         // If model failed, update status
         if (errorMessage.includes("status-500") || errorMessage.includes("Error")) {
-          setStatus(`Failed to connect · Model: ${model}`);
+          setStatus(`Failed to connect · Model: ${getModelLabel(model)}`);
           console.error(`[MODEL ERROR] Failed to use model: ${model}`);
         }
       }
@@ -227,11 +237,11 @@ function App() {
       disabled={isSending}
     >
       <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-      <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+      <option value="gemini-2.5-flash-lite" >Gemini 2.5 Flash Lite</option>
       <option value="nvidia/nemotron-nano-9b-v2:free">Nemotron Nano v1</option>
       <option value="nvidia/nemotron-nano-12b-v2-vl:free">Nemotron Nano v2</option>
       <option value="qwen/qwen3-4b:free">Qwen3</option>
-      <option value="tngtech/deepseek-r1t2-chimera:free">Deepseek r1t2</option>
+      <option value="tngtech/deepseek-r1t2-chimera:free" >Deepseek r1t2</option>
     </select>
     <span className="status">{status}</span>
   </div>

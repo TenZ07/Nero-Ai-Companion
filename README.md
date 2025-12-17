@@ -4,7 +4,7 @@
 
 ![Nero.AI Banner](https://img.shields.io/badge/Nero.AI-Companion-b8fb3c?style=for-the-badge&logo=ai&logoColor=03045e)
 
-**Your AI co-pilot powered by Google Gemini and OpenRouter**
+**An AI co-pilot powered by Google Gemini and OpenRouter**
 
 [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=flat-square&logo=react&logoColor=white)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4.11-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -16,14 +16,13 @@
 
 ## Features
 
-- Stunning Glassmorphic UI with modern design and neon accents
-- Real-time AI Chat powered by Google's Gemini AI and OpenRouter models
-- Multiple AI Models: Gemini 2.5 Flash, Gemini 2.5 Pro, Qwen3 Coder, and more
-- Multiple AI Behaviors: Explainer, Brief, Sarcastic Humor
-- Interrupt Support to stop AI responses mid-generation
-- Responsive Design optimized for desktop, tablet, and mobile
-- Quick Prompts with pre-configured suggestions
-- Smooth Scrolling with auto-scroll and custom scrollbars
+- Glassmorphic, modern UI with neon accents and refined visual hierarchy.
+- Real-time AI chat with integrated Google Gemini and OpenRouter backends.
+- Multi-model support (e.g., Gemini 2.5 Flash, Gemini 2.5 Flash lite, Qwen3 Coder, Nemotron Nano).
+- Configurable AI behaviors: Explainer, Brief, Sarcastic Humor.
+- Interruptible responses to stop generation mid-stream.
+- Fully responsive design optimized for desktop, tablet, and mobile.
+- Quick prompts with curated, pre-configured suggestions.
 
 ## Quick Start
 
@@ -42,195 +41,111 @@ Before you begin, ensure you have the following installed:
 
    ```bash
    git clone https://github.com/TenZ07/Nero-Ai-Companion.git
-   cd chatbot
    ```
 
 2. Install server dependencies
 
    ```bash
-   cd server
-   npm install
-   ```
+   # Nero.AI Companion
 
-3. Install client dependencies
+   Nero.AI Companion is a lightweight, open-source chat application that connects a React + Vite frontend to a Node.js backend which can use Google Gemini (via Google Generative AI) and OpenRouter models. It is designed for fast local development and experimentation with multiple model endpoints and conversation behaviors.
+
+   Repository layout:
+   - `client/` — React + Vite frontend
+   - `server/` — Express backend and API wrapper for model calls
+
+   Live demo: run locally.
+
+   Requirements
+   - Node.js v16+ and npm (or yarn)
+   - A Google AI Studio API key
+   - An OpenRouter API key
+    ```
+### Quickstart — run locally
+
+1) Install dependencies
 
    ```bash
+   # from repository root
+   cd server
+   npm install
+
    cd ../client
    npm install
    ```
 
-### Configuration
+2) Configure environment for the server
 
-**IMPORTANT:** You must configure your Google AI Studio API key before running the application.
-
-1. Navigate to the server directory
-
-   ```bash
-   cd server
-   ```
-
-2. Create a `.env` file in the `server` folder
-
-   ```bash
-   # Windows (PowerShell)
-   Copy-Item .env.example .env
-
-   # Linux/Mac
-   cp .env.example .env
-   ```
-
-3. Add your API keys to the `.env` file:
+   Create `server/.env` (example keys shown):
 
    ```env
-   GOOGLE_API_KEY=your_google_ai_studio_api_key_here
-   GOOGLE_MODEL=gemini-2.5-flash || gemini-2.5-flash-lite
+   GOOGLE_API_KEY=your_google_api_key_here
+   GOOGLE_MODEL=gemini-2.5-flash
    OPENROUTER_API_KEY=your_openrouter_api_key_here
-   PORT=5000
+   PORT=5000(default)
    ```
 
-   **How to get your Google API key:**
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Sign in with your Google account
-   - Click "Create API Key"
-   - Copy and paste the key into your `.env` file
+   Notes:
+   - If you do not provide `GOOGLE_API_KEY`, the server will still attempt to use OpenRouter models when a model identifier contains `/` or known OpenRouter model names.
 
-   **How to get your OpenRouter API key (for Qwen3 Coder):**
-   - Visit [OpenRouter](https://openrouter.ai/keys)
-   - Sign in or create an account
-   - Generate a new API key
-   - Copy and paste the key into your `.env` file
+3) Start the backend and frontend (two terminals)
 
-## Usage
+   ```bash
+   # Terminal 1 — server
+   cd server
+   npm run dev
 
-### Running the Application
+   # Terminal 2 — client
+   cd client
+   npm run dev
+   ```
+   ## Configuration & behavior
 
-You need to run both the server and client simultaneously.
+   - Frontend model options and labels are defined in `client/src/App.jsx`.
+   - Server behavior presets are in `server/src/index.js` under the `BEHAVIOURS` constant; these control system messages and generation config.
+   - The server exposes a `/health` endpoint which returns `{ status: 'ok', model: <MODEL_NAME> }` (defaults to `GOOGLE_MODEL` from `.env`).
 
-#### Terminal 1: Start the Backend Server
+   ## Project structure
 
-```bash
-cd server
-npm start
-```
+   - `client/` — React application
+     - `src/` — app sources; main component: `client/src/App.jsx`
+     - `src/lib/api.js` — client
 
+   - `server/` — Express server
+     - `src/index.js` — main server file and model-bridge logic
+     - `.env` — runtime configuration (not committed)
 
-#### Terminal 2: Start the Frontend Client
+   ## Development notes
 
-```bash
-cd client
-npm run dev
-```
+   - The client uses Vite for fast HMR and dev server.
+   - The server uses `nodemon` in `npm run dev` for automatic reloads.
+   - Error handling in the client sets user-facing `status` and `error` strings; model IDs are reported by the server as the `model` field on chat responses.
 
-The client will start on `http://localhost:5173`
+   ## Troubleshooting
 
-### Using Nero.AI
+   - If the server logs `Missing GOOGLE_API_KEY` or `Missing OPENROUTER_API_KEY`, add the respective key to `server/.env`.
+   - If the client shows `Offline` in the status bar, verify the server is running and reachable at the address configured in `client/src/lib/api.js`.
+   - Check console log messages for error details.
 
-1. Open your browser and navigate to `http://localhost:5173`
-2. You'll see a welcome message from Nero
-3. Type your question in the input field at the bottom
-4. Press Enter or click the send button
-5. Watch Nero respond with AI-generated answers
-6. Click the stop button anytime to interrupt a response
+   ## Contributing
 
-## Project Structure
+   PRs and issues are welcome. Suggested workflow:
 
-```
-chatbot/
-├── client/                 # Frontend React application
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   │   ├── ChatBubble.jsx
-│   │   │   ├── Footer.jsx
-│   │   │   ├── MessageInput.jsx
-│   │   │   └── TypingIndicator.jsx
-│   │   ├── lib/           # API utilities
-│   │   │   └── api.js
-│   │   ├── App.jsx        # Main app component
-│   │   ├── App.css        # Styling
-│   │   └── main.jsx       # Entry point
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
-│
-├── server/                # Backend Node.js server
-│   ├── src/
-│   │   └── index.js       # Express server & Gemini API
-│   ├── .env               # Environment variables
-│   └── package.json
-│
-└── README.md
-```
+   1. Fork the repository
+   2. Create a feature branch
+   3. Open a concise PR describing the change
 
-## Tech Stack
+   Please include tests or manual verification steps for non-trivial features.
 
-### Frontend
-- React 18.3.1
-- Vite 5.4.11
-- CSS3 with custom animations
+   ## License
 
-### Backend
-- Node.js
-- Express
-- Google Generative AI (Gemini API)
-- OpenRouter API
-- node-fetch
-- CORS
-- dotenv
+   This project is provided under the MIT License.
 
-## Customization
+   <hr>
 
-### Modifying Prompts
+    Author: TenZ07 — https://github.com/TenZ07
 
-Edit the `PROMPTS` array in `client/src/App.jsx`:
+   ---
+    
+    ><p align="center">Peace ;)</p>
 
-```javascript
-const PROMPTS = [
-  "Your custom prompt 1",
-  "Your custom prompt 2",
-];
-```
-
-### Changing AI Model
-
-You can switch between different AI models directly in the UI using the model selector dropdown, or set a default model in `server/.env`:
-
-```env
-GOOGLE_MODEL=gemini-2.5-flash # or gemini-2.5-flash-lite
-```
-
-**Available Models:**
-- **Gemini 2.5 Flash** - Fast and efficient
-- **Gemini 2.5 Flash Lite** - Lightweight version
-- **Nemotron Nano v1** - Lightweight general-purpose model
-- **Nemotron Nano v2** - Multimodal vision-language model
-- **Qwen3 4B** - Compact general-purpose language model
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## Author
-
-**TenZ07**
-
-- GitHub: [@TenZ07](https://github.com/TenZ07)
-
-## Show your support
-
-Give a star if this project helped you!
-
-<div align="center">
-
-**Built with React, Node.js, and Google Gemini AI**
-
-</div>
