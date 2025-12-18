@@ -18,10 +18,10 @@ const MODEL_LABELS = {
 
 const getModelLabel = (id) => MODEL_LABELS[id] ?? id;
 const PROMPTS = [
-  "Ask my goals and preferences first, then build a personalized plan.",
-  "Ask my subject and level, then explain and quiz me.",
-  "Ask project details such as language, features, then generate the code.",
-  "Ask tone and purpose first, then write the final content.",
+  "Build a personalized plan for my goals",
+  "Explain and quiz me on a subject",
+  "Generate code for my project",
+  "Write content with specific tone",
 ];
 
 const makeId = () =>
@@ -136,7 +136,7 @@ function App() {
     }, 5000);
 
     // Trigger on 8th click
-    if (logoClicksRef.current === 8) {
+    if (logoClicksRef.current === 7) {
       triggerBalloonEasterEgg();
       logoClicksRef.current = 0;
       if (clickTimerRef.current) {
