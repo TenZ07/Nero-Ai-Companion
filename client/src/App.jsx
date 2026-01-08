@@ -9,11 +9,12 @@ import "./App.css";
 const MODEL_LABELS = {
   "gemini-2.5-flash": "Gemini 2.5 Flash",
   "gemini-2.5-flash-lite": "Gemini 2.5 Flash Lite",
+  "gemini-3-flash-preview":"Gemini 3 Flash",
   "nvidia/nemotron-nano-9b-v2:free": "Nemotron Nano v1",
   "nvidia/nemotron-nano-12b-v2-vl:free": "Nemotron Nano v2",
   "qwen/qwen3-4b:free": "Qwen3",
   "tngtech/deepseek-r1t2-chimera:free": "Deepseek r1t2",
-  "openai/gpt-oss-20b:free":"GPT OSS"
+  "z-ai/glm-4.5-air:free":"GLM 4.5 Air"
 };
 
 const getModelLabel = (id) => MODEL_LABELS[id] ?? id;
@@ -138,11 +139,16 @@ function App() {
     // Trigger on 8th click
     if (logoClicksRef.current === 7) {
       triggerBalloonEasterEgg();
+      
+      setShowSnow(true);
+      setTimeout(() => setShowSnow(false), 8000);
+
       logoClicksRef.current = 0;
       if (clickTimerRef.current) {
         clearTimeout(clickTimerRef.current);
       }
     }
+    
   };
 
   useEffect(() => {
@@ -199,7 +205,6 @@ function App() {
       const responseModel = data?.model || model;
       
       if (!isAbortedRef.current) {
-        // Update current model on successful response
         if (responseModel !== currentModel) {
           setCurrentModel(responseModel);
           setStatus(`Connected · Model: ${getModelLabel(responseModel)}`);
@@ -219,11 +224,9 @@ function App() {
       if (err.name === "AbortError") {
         setError("Response interrupted.");
       } else if (!isAbortedRef.current) {
-        // Check if it's a model connection error
         const errorMessage = err.message || "Something went wrong. Try again.";
         setError(errorMessage);
         
-        // If model failed, update status
         if (errorMessage.includes("status-500") || errorMessage.includes("Error")) {
           setStatus(`Failed to connect · Model: ${getModelLabel(model)}`);
           console.error(`[MODEL ERROR] Failed to use model: ${model}`);
@@ -260,6 +263,7 @@ function App() {
   const hasUserMessages = messages.some((message) => message.role === "user");
 
   return (
+    <>
     <div className="app-shell">
       <div className="aurora" />
       <a
@@ -324,11 +328,12 @@ function App() {
     >
       <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
       <option value="gemini-2.5-flash-lite" >Gemini 2.5 Flash Lite</option>
+      <option value="gemini-3-flash-preview" >Gemini 3 Flash</option>
       <option value="nvidia/nemotron-nano-9b-v2:free">Nemotron Nano v1</option>
       <option value="nvidia/nemotron-nano-12b-v2-vl:free">Nemotron Nano v2</option>
       <option value="qwen/qwen3-4b:free">Qwen3</option>
       <option value="tngtech/deepseek-r1t2-chimera:free" >Deepseek r1t2</option>
-      <option value="openai/gpt-oss-20b:free" >GPT OSS</option>
+      <option value="z-ai/glm-4.5-air:free" >GLM 4.5 Air</option>
     </select>
     <span className="status">{status}</span>
   </div>
@@ -360,9 +365,11 @@ function App() {
           onInterrupt={handleInterrupt}
           canInterrupt={!!abortController}
         />
+        
         <Footer/>
       </div>
     </div>
+    </>
   );
 }
 
