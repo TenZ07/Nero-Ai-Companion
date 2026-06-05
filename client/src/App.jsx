@@ -331,8 +331,8 @@ function App() {
       <option value="gemini-3-flash-preview">Gemini 3 Flash</option>
       <option value="nvidia/nemotron-nano-9b-v2:free">Nemotron Nano v1</option>
       <option value="nvidia/nemotron-nano-12b-v2-vl:free">Nemotron Nano v2</option>
-      <option value="qwen/qwen3-4b:free">Qwen3</option>
-      <option value="tngtech/deepseek-r1t2-chimera:free">Deepseek r1t2</option>
+      <option value="laguna-xs.2:free">Laguna XS.2</option>
+      <option value="liquid/lfm-2.5-1.2b-thinking:free">Liquid lfm</option>
       <option value="z-ai/glm-4.5-air:free">GLM 4.5 Air</option>
     </select>
     <span className="status">{status}</span>
