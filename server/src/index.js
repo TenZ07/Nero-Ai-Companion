@@ -30,7 +30,7 @@ const BEHAVIOURS = {
     generationConfig: {
       temperature: 0.2,
       topP: 0.95,
-      maxOutputTokens: 800
+      maxOutputTokens: 4096
     },
     examples: [
       {
@@ -51,7 +51,7 @@ const BEHAVIOURS = {
     generationConfig: {
       temperature: 0.0,
       topP: 0.8,
-      maxOutputTokens: 500
+      maxOutputTokens: 2048
     },
     examples: []
   },
@@ -62,7 +62,7 @@ const BEHAVIOURS = {
     generationConfig: {
       temperature: 0.0,
       topP: 0.9,
-      maxOutputTokens: 500
+      maxOutputTokens: 2048
     },
     examples: []
   },
@@ -73,7 +73,7 @@ const BEHAVIOURS = {
     generationConfig: {
       temperature: 0.7,
       topP: 0.95,
-      maxOutputTokens: 2048
+      maxOutputTokens: 4096
     },
     examples: [
       {
@@ -226,10 +226,18 @@ app.post("/api/chat", async (req, res) => {
     const allHistory = normalizeHistory(messages.slice(0, -1));
     const historyFromClient = allHistory.slice(-10);
 
-    // Gemini 2.5 Pro uses more tokens for thinking, so we need a higher limit
-    const isProModel = selectedModel.includes('2.5-pro');
-    const minTokens = isProModel ? 4096 : 1024;
-    const finalMaxTokens = Math.max(preset.generationConfig.maxOutputTokens, minTokens);
+    // Set appropriate token limits based on model
+    const isFlashModel = selectedModel.includes('flash');
+    const isProModel = selectedModel.includes('pro');
+    
+    let finalMaxTokens = preset.generationConfig.maxOutputTokens;
+    
+    // Override with model-specific limits if needed
+    if (isProModel) {
+      finalMaxTokens = Math.max(finalMaxTokens, 8192);
+    } else if (isFlashModel) {
+      finalMaxTokens = Math.max(finalMaxTokens, 4096);
+    }
     
     console.log(`[TOKEN CONFIG] Model: ${selectedModel} | maxOutputTokens: ${finalMaxTokens}`);
 

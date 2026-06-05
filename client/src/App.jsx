@@ -6,11 +6,23 @@ import Footer from "./components/Footer";
 import { sendChat, getHealth } from "./lib/api";
 import "./App.css";
 
+const MODEL_LABELS = {
+  "gemini-2.5-flash": "Gemini 2.5 Flash",
+  "gemini-2.5-flash-lite": "Gemini 2.5 Flash Lite",
+  "gemini-3-flash-preview":"Gemini 3 Flash",
+  "nvidia/nemotron-nano-9b-v2:free": "Nemotron Nano v1",
+  "nvidia/nemotron-nano-12b-v2-vl:free": "Nemotron Nano v2",
+  "qwen/qwen3-4b:free": "Qwen3",
+  "tngtech/deepseek-r1t2-chimera:free": "Deepseek r1t2",
+  "z-ai/glm-4.5-air:free":"GLM 4.5 Air"
+};
+
+const getModelLabel = (id) => MODEL_LABELS[id] ?? id;
 const PROMPTS = [
-  "Ask my goals and preferences first, then build a personalized plan.",
-  "Ask my subject and level, then explain and quiz me.",
-  "Ask project details such as language, features, then generate the code.",
-  "Ask tone and purpose first, then write the final content.",
+  "Build a personalized plan for my goals",
+  "Explain and quiz me on a subject",
+  "Generate code for my project",
+  "Write content with specific tone",
 ];
 
 const makeId = () =>
@@ -24,7 +36,7 @@ function App() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hey, I'm Nero, your AI co-pilot powered by Google Gemini.",
+        "Nero is active. Let’s get to work.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -37,6 +49,9 @@ function App() {
   const [abortController, setAbortController] = useState(null);
   const chatWindowRef = useRef(null);
   const isAbortedRef = useRef(false);
+  const logoClicksRef = useRef(0);
+  const clickTimerRef = useRef(null);
+  const easterEggTriggeredRef = useRef(false);
 
   const handleModelChange = (newModel) => {
     console.log(`[MODEL SELECTED] User selected: ${newModel}`);
@@ -49,10 +64,91 @@ function App() {
       {
         id: "welcome",
         role: "assistant",
-        content: "Hey, I'm Nero, your AI co-pilot powered by Google Gemini.",
+        content: "Nero is active. Let’s get to work.",
       },
     ]);
     setError("");
+  };
+
+  const triggerBalloonEasterEgg = () => {
+    if (easterEggTriggeredRef.current) return;
+    easterEggTriggeredRef.current = true;
+
+    const balloonCount = Math.floor(Math.random() * 16) + 25; // 25-40 balloons
+    const glowColors = [
+      { glow: 'rgba(184, 251, 60, 0.8)', shadow: '0 0 30px rgba(184, 251, 60, 0.9), 0 0 60px rgba(184, 251, 60, 0.6)' },
+      { glow: 'rgba(255, 179, 186, 0.8)', shadow: '0 0 30px rgba(255, 179, 186, 0.9), 0 0 60px rgba(255, 179, 186, 0.6)' },
+      { glow: 'rgba(186, 225, 255, 0.8)', shadow: '0 0 30px rgba(186, 225, 255, 0.9), 0 0 60px rgba(186, 225, 255, 0.6)' },
+      { glow: 'rgba(255, 223, 186, 0.8)', shadow: '0 0 30px rgba(255, 223, 186, 0.9), 0 0 60px rgba(255, 223, 186, 0.6)' },
+      { glow: 'rgba(186, 255, 201, 0.8)', shadow: '0 0 30px rgba(186, 255, 201, 0.9), 0 0 60px rgba(186, 255, 201, 0.6)' },
+      { glow: 'rgba(230, 186, 255, 0.8)', shadow: '0 0 30px rgba(230, 186, 255, 0.9), 0 0 60px rgba(230, 186, 255, 0.6)' },
+    ];
+
+    const container = document.createElement('div');
+    container.className = 'balloon-container';
+    document.body.appendChild(container);
+
+    for (let i = 0; i < balloonCount; i++) {
+      const balloon = document.createElement('img');
+      balloon.src = '/nero-logo.svg';
+      balloon.className = 'balloon-logo';
+      
+      const colorData = glowColors[Math.floor(Math.random() * glowColors.length)];
+      const size = Math.random() * 60 + 30; // 30-90px (bigger range)
+      const startX = Math.random() * 100; // 0-100%
+      const duration = Math.random() * 1.5 + 2; // 2-3.5s (faster!)
+      const delay = Math.random() * 0.5; // 0-0.5s
+      const swayAmount = Math.random() * 80 - 40; // -40 to 40px
+      const rotation = Math.random() * 720 - 360; // -360 to 360 degrees
+      
+      balloon.style.cssText = `
+        left: ${startX}%;
+        width: ${size}px;
+        height: ${size}px;
+        filter: drop-shadow(${colorData.shadow});
+        animation-duration: ${duration}s;
+        animation-delay: ${delay}s;
+        --sway-amount: ${swayAmount}px;
+        --rotation: ${rotation}deg;
+      `;
+      
+      container.appendChild(balloon);
+    }
+
+    // Cleanup after animation
+    setTimeout(() => {
+      container.remove();
+    }, 5000);
+  };
+
+  const handleLogoClick = () => {
+    if (easterEggTriggeredRef.current) return;
+
+    logoClicksRef.current += 1;
+
+    // Clear existing timer
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+    }
+
+    // Reset counter after 5 seconds
+    clickTimerRef.current = setTimeout(() => {
+      logoClicksRef.current = 0;
+    }, 5000);
+
+    // Trigger on 8th click
+    if (logoClicksRef.current === 7) {
+      triggerBalloonEasterEgg();
+      
+      setShowSnow(true);
+      setTimeout(() => setShowSnow(false), 8000);
+
+      logoClicksRef.current = 0;
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+      }
+    }
+    
   };
 
   useEffect(() => {
@@ -60,7 +156,7 @@ function App() {
       .then((data) => {
         const modelName = data?.model ?? "gemini-2.5-flash";
         setCurrentModel(modelName);
-        setStatus(`Connected · Model: ${modelName}`);
+        setStatus(`Connected · Model: ${getModelLabel(modelName)}`);
       })
       .catch(() => {
         setStatus("Offline");
@@ -109,10 +205,9 @@ function App() {
       const responseModel = data?.model || model;
       
       if (!isAbortedRef.current) {
-        // Update current model on successful response
         if (responseModel !== currentModel) {
           setCurrentModel(responseModel);
-          setStatus(`Connected · Model: ${responseModel}`);
+          setStatus(`Connected · Model: ${getModelLabel(responseModel)}`);
           console.log(`[MODEL SWITCH] Now using: ${responseModel}`);
         }
         
@@ -129,13 +224,11 @@ function App() {
       if (err.name === "AbortError") {
         setError("Response interrupted.");
       } else if (!isAbortedRef.current) {
-        // Check if it's a model connection error
         const errorMessage = err.message || "Something went wrong. Try again.";
         setError(errorMessage);
         
-        // If model failed, update status
         if (errorMessage.includes("status-500") || errorMessage.includes("Error")) {
-          setStatus(`Failed to connect · Model: ${model}`);
+          setStatus(`Failed to connect · Model: ${getModelLabel(model)}`);
           console.error(`[MODEL ERROR] Failed to use model: ${model}`);
         }
       }
@@ -170,6 +263,7 @@ function App() {
   const hasUserMessages = messages.some((message) => message.role === "user");
 
   return (
+    <>
     <div className="app-shell">
       <div className="aurora" />
       <a
@@ -202,7 +296,13 @@ function App() {
       <div className="chat-card">
       <header className="chat-header">
   <div className="header-title-container">
-    <img src="/nero-logo.svg" alt="Nero AI Logo" className="header-logo" />
+    <img 
+      src="/nero-logo.svg" 
+      alt="Nero AI Logo" 
+      className="header-logo" 
+      onClick={handleLogoClick}
+      style={{ cursor: 'pointer' }}
+    />
     <div>
       <p className="eyebrow">Nero · AI Companion</p>
       <h1>Ask, explore, create.</h1>
@@ -265,9 +365,11 @@ function App() {
           onInterrupt={handleInterrupt}
           canInterrupt={!!abortController}
         />
+        
         <Footer/>
       </div>
     </div>
+    </>
   );
 }
 
