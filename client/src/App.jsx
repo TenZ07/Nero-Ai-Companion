@@ -12,8 +12,8 @@ const MODEL_LABELS = {
   "gemini-3-flash-preview":"Gemini 3 Flash",
   "nvidia/nemotron-nano-9b-v2:free": "Nemotron Nano v1",
   "nvidia/nemotron-nano-12b-v2-vl:free": "Nemotron Nano v2",
-  "qwen/qwen3-4b:free": "Qwen3",
-  "tngtech/deepseek-r1t2-chimera:free": "Deepseek r1t2",
+  "laguna-xs.2:free": "Laguna XS.2",
+  "liquid/lfm-2.5-1.2b-thinking:free": "Liquid lfm",
   "z-ai/glm-4.5-air:free":"GLM 4.5 Air"
 };
 
@@ -159,7 +159,6 @@ function App() {
         setStatus(`Connected · Model: ${getModelLabel(modelName)}`);
       })
       .catch(() => {
-        setStatus("Offline");
         setCurrentModel("");
       });
   }, []);
