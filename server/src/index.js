@@ -7,7 +7,7 @@ import fetch from "node-fetch";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 const MODEL_NAME = process.env.GOOGLE_MODEL;
 const apiKey = process.env.GOOGLE_API_KEY;
 const openRouterApiKey = process.env.OPENROUTER_API_KEY;
